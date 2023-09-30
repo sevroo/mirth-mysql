@@ -1,0 +1,40 @@
+version: "3.1"
+services:
+  mirth-connect:
+    image: nextgenhealthcare/connect
+    environment:
+      - DATABASE=mysql
+      - DATABASE_URL=jdbc:mysql://mysql-db:3306/mirthdb
+      - DATABASE_MAX_CONNECTIONS=20
+      - DATABASE_USERNAME=root
+      - DATABASE_PASSWORD=root
+      - DATABASE_MAX_RETRY=5
+      - DATABASE_RETRY_WAIT=10000
+      - KEYSTORE_STOREPASS=docker_storepass
+      - KEYSTORE_KEYPASS=docker_keypass
+      - VMOPTIONS=-Xmx512m
+    ports:
+      - 8080:8080/tcp
+      - 8443:8443/tcp
+    depends_on:
+      - mysql-db
+
+  mysql-db:
+    container_name: mirth-connect-mysql
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: on-failure
+    volumes:
+      - mysql-db:/var/lib/mysql
+      - mysql-log:/var/log/mysql
+    environment:
+      - MYSQL_DATABASE=mirthdb
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_USER=mirth
+      - MYSQL_PASSWORD=mirth
+    expose:
+      - 3306
+
+volumes:
+  mysql-db:
+  mysql-log:
